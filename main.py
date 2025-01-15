@@ -28,6 +28,7 @@ def cropimage(image_file):
             if ExifTags.TAGS[orientation]=='Orientation':
                 break
         exif = img._getexif()
+        st.write(exif)
         # if exif[orientation] is None:
         #     print('no tag')
         if exif[orientation] == 3:
@@ -102,7 +103,7 @@ def add_marker_map(fullmap,df,group_name,img_df):
         max_len_of_img=len(sort_img)-1
         html_str = f"""
             <br>
-            <img id="sort_img" src="{sort_img[0]}" style="width: 250px;" >
+            <img id="sort_img" src="{sort_img[0]}" style="width: 200px;" >
             <div style="text-align:center;">
             <p>{x[2]}<br>
             <span id="sort_dt">{sort_dt[0]}</span> / <span id="year_old">{year_ago}</span>
