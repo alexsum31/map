@@ -159,17 +159,19 @@ def main_app_draw_map():
     df=r.get_loc_df()
     img_df=r.get_img_df()
     
-    if 'map' not in st.session_state or st.session_state.map is None:
-        m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
-        #.add_child(folium.LatLngPopup())
-        draw_all_mark(df,m,img_df)
-        
-        folium.LayerControl().add_to(m)
+    #if 'map' not in st.session_state or st.session_state.map is None:
+    m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
+    #.add_child(folium.LatLngPopup())
+    draw_all_mark(df,m,img_df)
     
-        #Draw(export=True).add_to(m)
-        
-        st.session_state.map = m 
-    return st.session_state.map
+    folium.LayerControl().add_to(m)
+
+    #Draw(export=True).add_to(m)
+    
+    #st.session_state.map = m
+    folium.Map()
+    st_data = st_folium(m, width=900,use_container_width=True)
+    
 def draw_uploader():
     r=supabase_conn(SUPABASE_PROJECT_URL, SUPABASE_API_KEY)
     r.login_by_email(SUPABASE_UR, SUPABASE_PD)
@@ -208,20 +210,15 @@ if __name__ == "__main__":
     st.set_page_config(page_title='Map')
     loginSection = st.container()
     headerSection = st.container()
-    main_map=main_app_draw_map()
-  
-    folium.Map()
+
+    
     with headerSection:
         #if 'authenticated' not in st.session_state:
         client = login_form(allow_create =False)
      
         if st.session_state["authenticated"]:
+            main_app_draw_map()
             if st.session_state["username"]:
-                st.success(f"Welcome {st.session_state['username']}")
-                folium_static(main_map,width=350)
-                #st_data = st_folium(main_map, width=900,use_container_width=True)
                 draw_uploader()
-            else:
-                st.success("Welcome guest")      
-                folium_static(main_map,width=350)
-                #st_data = st_folium(main_map, width=900,use_container_width=True)
+
+                
