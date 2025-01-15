@@ -19,6 +19,7 @@ class supabase_conn:
         df=pd.DataFrame.from_dict(response.data, orient='columns')
         df['img_dt']=pd.to_datetime(df['img_dt'])
         df['img_dt']= df['img_dt'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        df=df.sort_values(by='seq_id', ascending=False)
         return df
     def get_loc_df(self):
         response = self.supabase.schema("public").table("loc_raw").select("*").execute()
