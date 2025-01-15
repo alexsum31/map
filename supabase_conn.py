@@ -4,6 +4,7 @@ import os
 from supabase import create_client, Client
 from pathlib import Path
 import pandas as pd
+import streamlit as st
 
 class supabase_conn:
     def __init__(self, project_url: str, api_key: str):
@@ -14,6 +15,7 @@ class supabase_conn:
             {"email": email, "password": password}
         )
         return response
+
     def get_img_df(self):
         response = self.supabase.schema("public").table("img_raw").select("*").execute()
         df=pd.DataFrame.from_dict(response.data, orient='columns')
@@ -21,6 +23,7 @@ class supabase_conn:
         df['img_dt']= df['img_dt'].apply(lambda x: x.strftime('%Y-%m-%d'))
         df=df.sort_values(by='seq_id', ascending=False)
         return df
+  
     def get_loc_df(self):
         response = self.supabase.schema("public").table("loc_raw").select("*").execute()
         df=pd.DataFrame.from_dict(response.data, orient='columns')
