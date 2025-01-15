@@ -1,7 +1,7 @@
 import numpy as np
 import streamlit as st
 import folium
-from streamlit_folium import st_folium
+from streamlit_folium import st_folium ,folium_static
 from folium.plugins import Draw ,BeautifyIcon
 import datetime
 import pandas as pd
@@ -20,29 +20,11 @@ SUPABASE_UR=st.secrets['LOGIN_USER']
 SUPABASE_PD=st.secrets['LOGIN_PW']
 #XLSPATH='loc.xlsx'
 
-def load_image(image_file):
-	#img = Image.open(image_file).convert("RGB")
-    img = Image.open(image_file)
-    try:
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation]=='Orientation':
-                break
-        exif = img._getexif()
-        # if exif[orientation] is None:
-        #     print('no tag')
-        if exif[orientation] == 3:
-            img=img.rotate(180, expand=True)
-        elif exif[orientation] == 6:
-            img=img.rotate(270, expand=True)
-        elif exif[orientation] == 8:
-            img=img.rotate(90, expand=True)  
-    except:
-        print("no tag")
-    return img
 
-def cropimage(iMA):
-    height=iMA.height
-    width=iMA.width
+def cropimage(image_file):
+    img = Image.open(image_file)
+    height=img.height
+    width=img.width
     if width>height : 
         new_width  = int(500)#int(600 *((100-border)/100))
         new_height = int(math.ceil(new_width * height / width ))
@@ -50,7 +32,7 @@ def cropimage(iMA):
         #new_height = 750
         new_height  =int(500)#int(600 *((100-border)/100))
         new_width  = int(math.ceil(new_height * width / height))
-    return iMA.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    return img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
 # function for read excel to list
 def read_excel_to_list(file_path):
@@ -176,15 +158,18 @@ def main_app_draw_map():
     r.login_by_email(SUPABASE_UR, SUPABASE_PD)
     df=r.get_loc_df()
     img_df=r.get_img_df()
-    m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
-    #.add_child(folium.LatLngPopup())
-    draw_all_mark(df,m,img_df)
     
-    folium.LayerControl().add_to(m)
- 
-    #Draw(export=True).add_to(m)
-    folium.Map()
-    st_data = st_folium(m, width=900,use_container_width=True)
+    if 'map' not in st.session_state or st.session_state.map is None:
+        m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
+        #.add_child(folium.LatLngPopup())
+        draw_all_mark(df,m,img_df)
+        
+        folium.LayerControl().add_to(m)
+    
+        #Draw(export=True).add_to(m)
+        
+        st.session_state.map = m 
+    return st.session_state.map
 def draw_uploader():
     r=supabase_conn(SUPABASE_PROJECT_URL, SUPABASE_API_KEY)
     r.login_by_email(SUPABASE_UR, SUPABASE_PD)
@@ -201,8 +186,7 @@ def draw_uploader():
             submit_button = st.form_submit_button(label='Submit')
             
             if submit_button:
-                img_rot=load_image(uploaded_file)
-                resize_img=cropimage(img_rot)
+                resize_img=cropimage(uploaded_file)
                 buffered = BytesIO()
                 resize_img.save(buffered, format="JPEG")
                 f=buffered.getvalue()
@@ -224,7 +208,9 @@ if __name__ == "__main__":
     st.set_page_config(page_title='Map')
     loginSection = st.container()
     headerSection = st.container()
-
+    main_map=main_app_draw_map()
+  
+    folium.Map()
     with headerSection:
         #if 'authenticated' not in st.session_state:
         client = login_form(allow_create =False)
@@ -232,8 +218,10 @@ if __name__ == "__main__":
         if st.session_state["authenticated"]:
             if st.session_state["username"]:
                 st.success(f"Welcome {st.session_state['username']}")
-                main_app_draw_map()
+                folium_static(main_map)
+                #st_data = st_folium(main_map, width=900,use_container_width=True)
                 draw_uploader()
             else:
-                st.success("Welcome guest")
-                main_app_draw_map()
+                st.success("Welcome guest")      
+                folium_static(main_map)
+                #st_data = st_folium(main_map, width=900,use_container_width=True)
