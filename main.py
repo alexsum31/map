@@ -139,8 +139,8 @@ def add_marker_map(fullmap,df,group_name,img_df):
                     </div>
             """
 #{count_value}
-        current_bg='black'
-        current_font='white'
+        current_bg='white'
+        current_font='black'
         if sort_img[0]=='https://kycvtdlganlfymsyczpu.supabase.co/storage/v1/object/public/img/no_img.jpeg':
             current_bg='black'
             current_font='white'
