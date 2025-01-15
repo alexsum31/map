@@ -218,10 +218,10 @@ if __name__ == "__main__":
         if st.session_state["authenticated"]:
             if st.session_state["username"]:
                 st.success(f"Welcome {st.session_state['username']}")
-                folium_static(main_map,width=500)
+                folium_static(main_map,width=350)
                 #st_data = st_folium(main_map, width=900,use_container_width=True)
                 draw_uploader()
             else:
                 st.success("Welcome guest")      
-                folium_static(main_map,width=500)
+                folium_static(main_map,width=350)
                 #st_data = st_folium(main_map, width=900,use_container_width=True)
