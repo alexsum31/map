@@ -139,10 +139,15 @@ def add_marker_map(fullmap,df,group_name,img_df):
                     </div>
             """
 #{count_value}
+        current_bg='black'
+        current_font='white'
+        if sort_img[0]=='https://kycvtdlganlfymsyczpu.supabase.co/storage/v1/object/public/img/no_img.jpeg':
+            current_bg='black'
+            current_font='white'
         folium.Marker((x[0],x[1]),popup=html_str,icon=folium.DivIcon(
                                         icon_size=(150,36),
                                         icon_anchor=(0,0),
-                                    html=f'<div style="font-size: 8pt;background-color:black;color:white;width: 25%;text-align:center;">{x[2]}</div>',
+                                    html=f'<div style="font-size: 8pt;background-color:{current_bg};color:{current_font};width: 25%;text-align:center;">{x[2]}</div>',
                                         )
                       ).add_to(group_name)
    
