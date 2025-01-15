@@ -170,7 +170,7 @@ def main_app_draw_map():
     
     #st.session_state.map = m
     folium.Map()
-    st_data = st_folium(m, width=900,use_container_width=True)
+    st_folium(m, width=900,use_container_width=True, returned_objects=[])
     
 def draw_uploader():
     r=supabase_conn(SUPABASE_PROJECT_URL, SUPABASE_API_KEY)
