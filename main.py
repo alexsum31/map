@@ -28,7 +28,7 @@ def cropimage(image_file):
             if ExifTags.TAGS[orientation]=='Orientation':
                 break
         exif = img._getexif()
-        st.write(exif)
+        st.write(exif[306].value)
         # if exif[orientation] is None:
         #     print('no tag')
         if exif[orientation] == 3:
