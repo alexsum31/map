@@ -9,12 +9,48 @@ from streamlit.components.v1 import html
 from supabase_conn import supabase_conn
 import uuid
 from st_login_form import login_form
+from PIL import Image, ImageFile,ImageChops, ExifTags
+import math
+import base64
+from io import BytesIO
 
 SUPABASE_PROJECT_URL=st.secrets['SUPABASE_URL']
 SUPABASE_API_KEY=st.secrets['SUPABASE_KEY']
 SUPABASE_UR=st.secrets['LOGIN_USER']
 SUPABASE_PD=st.secrets['LOGIN_PW']
 #XLSPATH='loc.xlsx'
+
+def load_image(image_file):
+	#img = Image.open(image_file).convert("RGB")
+    img = Image.open(image_file)
+    try:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation]=='Orientation':
+                break
+        exif = img._getexif()
+        # if exif[orientation] is None:
+        #     print('no tag')
+        if exif[orientation] == 3:
+            img=img.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            img=img.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            img=img.rotate(90, expand=True)  
+    except:
+        print("no tag")
+    return img
+
+def cropimage(iMA):
+    height=iMA.height
+    width=iMA.width
+    if width>height : 
+        new_width  = int(500)#int(600 *((100-border)/100))
+        new_height = int(math.ceil(new_width * height / width ))
+    else:
+        #new_height = 750
+        new_height  =int(500)#int(600 *((100-border)/100))
+        new_width  = int(math.ceil(new_height * width / height))
+    return iMA.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
 # function for read excel to list
 def read_excel_to_list(file_path):
@@ -69,7 +105,7 @@ def add_marker_map(fullmap,df,group_name,img_df):
         max_len_of_img=len(sort_img)-1
         html_str = f"""
             <br>
-            <img id="sort_img" src="{sort_img[0]}" width="150" height="200">
+            <img id="sort_img" src="{sort_img[0]}" style="width: 250px;" >
             <div style="text-align:center;">
             <p>{x[2]}<br>
             <span id="sort_dt">{sort_dt[0]}</span> / <span id="year_old">{year_ago}</span>
@@ -165,7 +201,11 @@ def draw_uploader():
             submit_button = st.form_submit_button(label='Submit')
             
             if submit_button:
-                f=uploaded_file.getvalue()
+                img_rot=load_image(uploaded_file)
+                resize_img=cropimage(img_rot)
+                buffered = BytesIO()
+                resize_img.save(buffered, format="JPEG")
+                f=buffered.getvalue()
                 generated_uuid = uuid.uuid4()
                 r.upload_img_st(str(generated_uuid)+'.jpeg',f)
                 url_path_full=r.check_url(str(generated_uuid)+'.jpeg')
