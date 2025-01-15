@@ -23,6 +23,21 @@ SUPABASE_PD=st.secrets['LOGIN_PW']
 
 def cropimage(image_file):
     img = Image.open(image_file)
+    try:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation]=='Orientation':
+                break
+        exif = img._getexif()
+        # if exif[orientation] is None:
+        #     print('no tag')
+        if exif[orientation] == 3:
+            img=img.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            img=img.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            img=img.rotate(90, expand=True)  
+    except:
+        print("no tag")
     height=img.height
     width=img.width
     if width>height : 
