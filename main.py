@@ -69,7 +69,7 @@ def add_marker_map(fullmap,df,group_name,img_df):
         max_len_of_img=len(sort_img)-1
         html_str = f"""
             <br>
-            <img id="sort_img" src="{sort_img[0]}" width="200" height="200">
+            <img id="sort_img" src="{sort_img[0]}" width="150" height="200">
             <div style="text-align:center;">
             <p>{x[2]}<br>
             <span id="sort_dt">{sort_dt[0]}</span> / <span id="year_old">{year_ago}</span>
