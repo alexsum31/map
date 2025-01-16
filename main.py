@@ -215,13 +215,12 @@ def draw_uploader():
     uploaded_file=st.file_uploader("Upload file", type=['jpeg','jpg'])
     if uploaded_file is not None:
         buffered = BytesIO()
-        resize_img , pic_date ,ori_str=cropimage(uploaded_file)
+        resize_img , pic_date=cropimage(uploaded_file)
         date_format = "%Y:%m:%d %H:%M:%S"
         date_time_obj = datetime.datetime.strptime(pic_date, date_format)
         resize_img.save(buffered, format="JPEG")
         f=buffered.getvalue()
         st.image(resize_img,width=60)
-        st.write(f'Orientation:{ori_str}')
         st.write(f'Take picture {pic_date}')
         with st.form(key='my_form',clear_on_submit=True):
             location_list=df['name'].unique().tolist()
@@ -243,8 +242,7 @@ def draw_uploader():
                                     'img_dt': formatted_date 
                             }
                 msg=r.img_row_insert(dict_str)
-                
-                st.write(msg)
+                st.rerun()
 
 
 if __name__ == "__main__":
