@@ -24,7 +24,7 @@ SUPABASE_PD=st.secrets['LOGIN_PW']
 def cropimage(image_file):
     img = Image.open(image_file)
     have_date='2020:01:01 00:00:00'
-    have_orientation=='0'
+    have_orientation='0'
     exif = img._getexif()
     
     if exif is not None:
