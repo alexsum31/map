@@ -41,19 +41,7 @@ def cropimage(image_file):
         img=img.rotate(270, expand=True)
     elif have_orientation == 8:
         img=img.rotate(90, expand=True)     
-    # try:
-        # for orientation in ExifTags.TAGS.keys():
-        #     if ExifTags.TAGS[orientation]=='Orientation':
-        #         break
-        # exif = img._getexif()
-        # if exif[orientation] == 3:
-        #     img=img.rotate(180, expand=True)
-        # elif exif[orientation] == 6:
-        #     img=img.rotate(270, expand=True)
-        # elif exif[orientation] == 8:
-        #     img=img.rotate(90, expand=True)       
-    # except:
-    #     print("no tag")
+
     height=img.height
     width=img.width
     if width>height : 
@@ -63,7 +51,7 @@ def cropimage(image_file):
         #new_height = 750
         new_height  =int(500)#int(600 *((100-border)/100))
         new_width  = int(math.ceil(new_height * width / height))
-    return img.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date ,have_orientation
+    return img.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date 
 
 # function for read excel to list
 def read_excel_to_list(file_path):
