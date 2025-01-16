@@ -63,7 +63,7 @@ def cropimage(image_file):
         #new_height = 750
         new_height  =int(500)#int(600 *((100-border)/100))
         new_width  = int(math.ceil(new_height * width / height))
-    return img.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date
+    return img.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date ,have_orientation
 
 # function for read excel to list
 def read_excel_to_list(file_path):
@@ -215,12 +215,13 @@ def draw_uploader():
     uploaded_file=st.file_uploader("Upload file", type=['jpeg','jpg'])
     if uploaded_file is not None:
         buffered = BytesIO()
-        resize_img , pic_date =cropimage(uploaded_file)
+        resize_img , pic_date ,ori_str=cropimage(uploaded_file)
         date_format = "%Y:%m:%d %H:%M:%S"
         date_time_obj = datetime.datetime.strptime(pic_date, date_format)
         resize_img.save(buffered, format="JPEG")
         f=buffered.getvalue()
         st.image(uploaded_file,width=60)
+        st.write(ori_str)
         st.write(f'Take picture {pic_date}')
         with st.form(key='my_form',clear_on_submit=True):
             location_list=df['name'].unique().tolist()
