@@ -213,14 +213,16 @@ def draw_uploader():
     if uploaded_file is not None:
         buffered = BytesIO()
         resize_img , pic_date =cropimage(uploaded_file)
+        date_format = "%Y:%m:%d %H:%M:%S"
+        date_time_obj = datetime.datetime.strptime(pic_date, date_format)
         resize_img.save(buffered, format="JPEG")
         f=buffered.getvalue()
-        
+        st.image(uploaded_file,width=60)
         st.write(f'Take picture {pic_date}')
         with st.form(key='my_form',clear_on_submit=True):
             location_list=df['name'].unique().tolist()
             select_location=st.selectbox('Select location',location_list)
-            picture_dt= st.date_input("Photo Date")
+            picture_dt= st.date_input("Photo Date",value=date_time_obj)
             formatted_date = picture_dt.strftime('%Y-%m-%d')
             submit_button = st.form_submit_button(label='Submit')
             
