@@ -27,6 +27,7 @@ class supabase_conn:
     def get_loc_df(self):
         response = self.supabase.schema("public").table("loc_raw").select("*").execute()
         df=pd.DataFrame.from_dict(response.data, orient='columns')
+        df=df.sort_values(by='id',asceding=True)
         return df
     def upload_img(self,filename):
         path=('./img/')
