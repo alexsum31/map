@@ -23,22 +23,34 @@ SUPABASE_PD=st.secrets['LOGIN_PW']
 
 def cropimage(image_file):
     img = Image.open(image_file)
-    try:
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation]=='Orientation':
-                break
-        exif = img._getexif()
-        print(exif[306].value)
-        # if exif[orientation] is None:
-        #     print('no tag')
-        if exif[orientation] == 3:
+    have_date='2020:01:01 00:00:00'
+    exif = img._getexif()
+    if exif is not None:
+        for (tag, value) in exif.items():
+            key = ExifTags.TAGS.get(tag, tag)
+            if key=='DateTimeDigitized':
+                have_date=str(value)
+            if key=='Orientation':
+                have_orientation=value
+        if have_orientation == 3:
             img=img.rotate(180, expand=True)
-        elif exif[orientation] == 6:
+        elif have_orientation== 6:
             img=img.rotate(270, expand=True)
-        elif exif[orientation] == 8:
-            img=img.rotate(90, expand=True)  
-    except:
-        print("no tag")
+        elif have_orientation == 8:
+            img=img.rotate(90, expand=True)     
+    # try:
+        # for orientation in ExifTags.TAGS.keys():
+        #     if ExifTags.TAGS[orientation]=='Orientation':
+        #         break
+        # exif = img._getexif()
+        # if exif[orientation] == 3:
+        #     img=img.rotate(180, expand=True)
+        # elif exif[orientation] == 6:
+        #     img=img.rotate(270, expand=True)
+        # elif exif[orientation] == 8:
+        #     img=img.rotate(90, expand=True)       
+    # except:
+    #     print("no tag")
     height=img.height
     width=img.width
     if width>height : 
@@ -48,7 +60,7 @@ def cropimage(image_file):
         #new_height = 750
         new_height  =int(500)#int(600 *((100-border)/100))
         new_width  = int(math.ceil(new_height * width / height))
-    return img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    return img.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date
 
 # function for read excel to list
 def read_excel_to_list(file_path):
@@ -199,8 +211,12 @@ def draw_uploader():
     df=r.get_loc_df()
     uploaded_file=st.file_uploader("Upload file", type=['jpeg','jpg'])
     if uploaded_file is not None:
+        buffered = BytesIO()
+        resize_img , pic_date =cropimage(uploaded_file)
+        resize_img.save(buffered, format="JPEG")
+        f=buffered.getvalue()
         
-        
+        st.write(f'Take picture {pic_date}')
         with st.form(key='my_form',clear_on_submit=True):
             location_list=df['name'].unique().tolist()
             select_location=st.selectbox('Select location',location_list)
@@ -209,10 +225,7 @@ def draw_uploader():
             submit_button = st.form_submit_button(label='Submit')
             
             if submit_button:
-                resize_img=cropimage(uploaded_file)
-                buffered = BytesIO()
-                resize_img.save(buffered, format="JPEG")
-                f=buffered.getvalue()
+               
                 generated_uuid = uuid.uuid4()
                 r.upload_img_st(str(generated_uuid)+'.jpeg',f)
                 url_path_full=r.check_url(str(generated_uuid)+'.jpeg')
@@ -224,6 +237,7 @@ def draw_uploader():
                                     'img_dt': formatted_date 
                             }
                 msg=r.img_row_insert(dict_str)
+                
                 st.write(msg)
 
 
