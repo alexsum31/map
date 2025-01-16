@@ -197,10 +197,12 @@ def main_app_draw_map():
     st_folium(m, width=900,use_container_width=True, returned_objects=[])
     
 def draw_uploader():
+    if "file_uploader_key" not in st.session_state:
+        st.session_state["file_uploader_key"] = 0
     r=supabase_conn(SUPABASE_PROJECT_URL, SUPABASE_API_KEY)
     r.login_by_email(SUPABASE_UR, SUPABASE_PD)
     df=r.get_loc_df()
-    uploaded_file=st.file_uploader("Upload file", type=['jpeg','jpg'])
+    uploaded_file=st.file_uploader("Upload file", type=['jpeg','jpg'],key=st.session_state["file_uploader_key"])
     if uploaded_file is not None:
         buffered = BytesIO()
         resize_img , pic_date=cropimage(uploaded_file)
@@ -230,6 +232,7 @@ def draw_uploader():
                                     'img_dt': formatted_date 
                             }
                 msg=r.img_row_insert(dict_str)
+                st.session_state["file_uploader_key"] += 1
                 st.rerun()
 
 
