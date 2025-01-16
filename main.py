@@ -24,7 +24,7 @@ SUPABASE_PD=st.secrets['LOGIN_PW']
 def cropimage(image_file):
     img = Image.open(image_file)
     have_date='2020:01:01 00:00:00'
-    have_orientation=0
+    have_orientation="0"
     exif = img._getexif()
     
     if exif is not None:
@@ -33,13 +33,13 @@ def cropimage(image_file):
             if key=='DateTimeDigitized':
                 have_date=str(value)
             if key=='Orientation':
-                have_orientation=value
+                have_orientation=str(value)
                 
-    if have_orientation == 3:
+    if have_orientation == "3":
         img=img.rotate(180, expand=True)
-    elif have_orientation== 6:
+    elif have_orientation== "6":
         img=img.rotate(270, expand=True)
-    elif have_orientation == 8:
+    elif have_orientation == "8":
         img=img.rotate(90, expand=True)     
     # try:
         # for orientation in ExifTags.TAGS.keys():
