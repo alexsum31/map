@@ -24,7 +24,7 @@ SUPABASE_PD=st.secrets['LOGIN_PW']
 def cropimage(image_file):
     img = Image.open(image_file)
     have_date='2020:01:01 00:00:00'
-    have_orientation="0"
+    have_orientation=0
     exif = img._getexif()
     
     if exif is not None:
@@ -33,14 +33,14 @@ def cropimage(image_file):
             if key=='DateTimeDigitized':
                 have_date=str(value)
             if key=='Orientation':
-                have_orientation=str(value)
+                have_orientation=value
                 
-    if have_orientation == "3":
-        img_A=img.rotate(180, expand=True)
-    elif have_orientation== "6":
-        img_A=img.rotate(270, expand=True)
-    elif have_orientation == "8":
-        img_A=img.rotate(90, expand=True)     
+    if have_orientation == 3:
+        img=img.rotate(180, expand=True)
+    elif have_orientation== 6:
+        img=img.rotate(270, expand=True)
+    elif have_orientation == 8:
+        img=img.rotate(90, expand=True)     
     # try:
         # for orientation in ExifTags.TAGS.keys():
         #     if ExifTags.TAGS[orientation]=='Orientation':
@@ -54,8 +54,8 @@ def cropimage(image_file):
         #     img=img.rotate(90, expand=True)       
     # except:
     #     print("no tag")
-    height=img_A.height
-    width=img_A.width
+    height=img.height
+    width=img.width
     if width>height : 
         new_width  = int(500)#int(600 *((100-border)/100))
         new_height = int(math.ceil(new_width * height / width ))
@@ -63,7 +63,7 @@ def cropimage(image_file):
         #new_height = 750
         new_height  =int(500)#int(600 *((100-border)/100))
         new_width  = int(math.ceil(new_height * width / height))
-    return img_A.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date ,have_orientation
+    return img.resize((new_width, new_height), Image.Resampling.LANCZOS) ,have_date ,have_orientation
 
 # function for read excel to list
 def read_excel_to_list(file_path):
@@ -220,7 +220,7 @@ def draw_uploader():
         date_time_obj = datetime.datetime.strptime(pic_date, date_format)
         resize_img.save(buffered, format="JPEG")
         f=buffered.getvalue()
-        st.image(uploaded_file,width=60)
+        st.image(resize_img,width=60)
         st.write(f'Orientation:{ori_str}')
         st.write(f'Take picture {pic_date}')
         with st.form(key='my_form',clear_on_submit=True):
