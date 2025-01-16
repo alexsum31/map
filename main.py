@@ -176,13 +176,35 @@ def draw_all_mark(df,fullmap,df_img):
                 add_marker_map(fullmap,group_filter_df_point,group_map_name,df_img)
       
  
- 
+def cal_img_locat(loc_df ,img_df):
+    line_count_df=loc_df[loc_df['name'] != 'dummy'].groupby(['group','name'])['id'].count().reset_index()
+    filter_img=img_df[img_df['img_dt']>='2020-11-02']
+    img_location_df=filter_img['name'].drop_duplicates().reset_index()
+    img_location_df['result'] = 1
+
+    merged_df = line_count_df.merge(img_location_df, on='name', how='left')
+    f_df=merged_df.groupby('group').count().reset_index()
+    df1 = f_df.drop(['name', 'index'], axis=1)
+    
+    return df1
 def main_app_draw_map():
     r=supabase_conn(SUPABASE_PROJECT_URL, SUPABASE_API_KEY)
     r.login_by_email(SUPABASE_UR, SUPABASE_PD)
     df=r.get_loc_df()
     img_df=r.get_img_df()
+    match_data_df=cal_img_locat(df,img_df)
+    num_rows = len(match_data_df)
+   
+    cols = st.columns(num_rows)
+    for index, row in match_data_df.iterrows():
+        if index < num_rows:  # Check to prevent index out of range error
+            cols[index].metric(row['group'],row['result'],row['id'])
+  
+        else:
+            st.write("Error: Index out of range")
+           # st.metric(delta=None)
     
+ 
     #if 'map' not in st.session_state or st.session_state.map is None:
     m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
     #.add_child(folium.LatLngPopup())
@@ -190,7 +212,7 @@ def main_app_draw_map():
     
     folium.LayerControl().add_to(m)
 
-    #Draw(export=True).add_to(m)
+    Draw(export=True).add_to(m)
     
     #st.session_state.map = m
     folium.Map()
@@ -241,7 +263,6 @@ if __name__ == "__main__":
     loginSection = st.container()
     headerSection = st.container()
 
-    
     with headerSection:
         #if 'authenticated' not in st.session_state:
         client = login_form(allow_create =False)
