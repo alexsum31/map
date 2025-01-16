@@ -194,11 +194,6 @@ def main_app_draw_map():
     img_df=r.get_img_df()
     match_data_df=cal_img_locat(df,img_df)
     num_rows = len(match_data_df)
-   
-  
-    
- 
-    #if 'map' not in st.session_state or st.session_state.map is None:
     m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
     #.add_child(folium.LatLngPopup())
     draw_all_mark(df,m,img_df)
@@ -206,10 +201,8 @@ def main_app_draw_map():
     folium.LayerControl().add_to(m)
 
     #Draw(export=True).add_to(m)
-    
-    #st.session_state.map = m
     folium.Map()
-    st_folium(m, width=900,use_container_width=True, returned_objects=[])
+    st_folium(m,height=450,use_container_width=True, returned_objects=[])
     
     cols = st.columns(2)
     for index, row in match_data_df.iterrows():
