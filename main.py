@@ -195,14 +195,7 @@ def main_app_draw_map():
     match_data_df=cal_img_locat(df,img_df)
     num_rows = len(match_data_df)
    
-    cols = st.columns(num_rows)
-    for index, row in match_data_df.iterrows():
-        if index < num_rows:  # Check to prevent index out of range error
-            cols[index].metric(row['group'],row['result'],row['id'])
   
-        else:
-            st.write("Error: Index out of range")
-           # st.metric(delta=None)
     
  
     #if 'map' not in st.session_state or st.session_state.map is None:
@@ -212,12 +205,24 @@ def main_app_draw_map():
     
     folium.LayerControl().add_to(m)
 
-    Draw(export=True).add_to(m)
+    #Draw(export=True).add_to(m)
     
     #st.session_state.map = m
     folium.Map()
     st_folium(m, width=900,use_container_width=True, returned_objects=[])
     
+    cols = st.columns(2)
+    for index, row in match_data_df.iterrows():
+        if index < num_rows:  # Check to prevent index out of range error
+            
+            if index % 2 == 0:
+                cols[0].caption(f"{row['group']}: {row['result']} / {row['id']}")
+            else:
+                cols[1].caption(f"{row['group']}: {row['result']} / {row['id']}")
+    
+        else:
+            st.write("Error: Index out of range")
+           # st.metric(delta=None)
 def draw_uploader():
     if "file_uploader_key" not in st.session_state:
         st.session_state["file_uploader_key"] = 0
