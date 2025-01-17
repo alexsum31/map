@@ -171,3 +171,4 @@ cython_debug/
 .pypirc
 .streamlit/config.toml
 .streamlit/secrets.toml
+loc.xlsx

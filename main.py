@@ -56,9 +56,10 @@ def cropimage(image_file):
 # function for read excel to list
 def read_excel_to_list(file_path):
     df = pd.read_excel(file_path,sheet_name='loc_raw')
+    df=df[df['line'].str.contains("LR505")]
     #datetime to date
     #df['img_dt']=df['img_dt'].dt.strftime('%Y-%m-%d')
-    return df.head(10)
+    return df
 def read_excel_img_to_list(file_path):
     df = pd.read_excel(file_path,sheet_name='img_raw')
     #datetime to date
@@ -99,22 +100,38 @@ def add_marker_map(fullmap,df,group_name,img_df):
         img_df_filter=img_df[img_df['name']==x[2]]
         sort_img = img_df_filter['img'].tolist()
         sort_dt = img_df_filter['img_dt'].tolist()
-    
+        current_bg='black'
+        current_font='white'
         #print(sort_dt[0])
+        try:
+            year_ago=calculate_age(sort_dt[0],'2020-10-31') 
 
-        year_ago=calculate_age(sort_dt[0],'2020-10-31')    
-        max_len_of_img=len(sort_img)-1
-        html_str = f"""
-            <br>
-            <img id="sort_img" src="{sort_img[0]}" style="width: 200px;" >
-            <div style="text-align:center;">
-            <p>{x[2]}<br>
-            <span id="sort_dt">{sort_dt[0]}</span> / <span id="year_old">{year_ago}</span>
-            </p>
-            </div>
-            <div style="text-align:center;padding: 5px;">
-              <button onclick="if(parseInt(document.getElementById('count').innerHTML) > 0) {{
-                    document.getElementById('count').innerHTML--; 
+            max_len_of_img=len(sort_img)-1
+            html_str = f"""
+                <br>
+                <img id="sort_img" src="{sort_img[0]}" style="width: 200px;" >
+                <div style="text-align:center;">
+                <p>{x[2]}<br>
+                <span id="sort_dt">{sort_dt[0]}</span> / <span id="year_old">{year_ago}</span>
+                </p>
+                </div>
+                <div style="text-align:center;padding: 5px;">
+                <button onclick="if(parseInt(document.getElementById('count').innerHTML) > 0) {{
+                        document.getElementById('count').innerHTML--; 
+                        var dates = {sort_dt};
+                        var img_num = {sort_img};
+                        var date2 = new Date(dates[parseInt(document.getElementById('count').innerHTML) % dates.length]);
+                        var date1 = new Date('October 31, 2020 12:00:00');
+                        var diffInMonths = (date2.getFullYear() - date1.getFullYear()) * 12 + (date2.getMonth() - date1.getMonth());
+                        var years = Math.floor(diffInMonths / 12);
+                        var months = (diffInMonths % 12) -1;
+                        document.getElementById('sort_dt').innerHTML = dates[parseInt(document.getElementById('count').innerHTML) % dates.length];
+                        document.getElementById('sort_img').src = img_num[parseInt(document.getElementById('count').innerHTML) % img_num.length];
+                        document.getElementById('year_old').innerHTML = ''+ years +'Y'+ months +'M';
+                    }}">
+                    <</button>           
+                    <span id="count">0</span> / {max_len_of_img}
+                    <button onclick="document.getElementById('count').innerHTML++; 
                     var dates = {sort_dt};
                     var img_num = {sort_img};
                     var date2 = new Date(dates[parseInt(document.getElementById('count').innerHTML) % dates.length]);
@@ -125,29 +142,16 @@ def add_marker_map(fullmap,df,group_name,img_df):
                     document.getElementById('sort_dt').innerHTML = dates[parseInt(document.getElementById('count').innerHTML) % dates.length];
                     document.getElementById('sort_img').src = img_num[parseInt(document.getElementById('count').innerHTML) % img_num.length];
                     document.getElementById('year_old').innerHTML = ''+ years +'Y'+ months +'M';
-                }}">
-                <</button>           
-                <span id="count">0</span> / {max_len_of_img}
-                <button onclick="document.getElementById('count').innerHTML++; 
-                var dates = {sort_dt};
-                var img_num = {sort_img};
-                var date2 = new Date(dates[parseInt(document.getElementById('count').innerHTML) % dates.length]);
-                var date1 = new Date('October 31, 2020 12:00:00');
-                var diffInMonths = (date2.getFullYear() - date1.getFullYear()) * 12 + (date2.getMonth() - date1.getMonth());
-                var years = Math.floor(diffInMonths / 12);
-                var months = (diffInMonths % 12) -1;
-                document.getElementById('sort_dt').innerHTML = dates[parseInt(document.getElementById('count').innerHTML) % dates.length];
-                document.getElementById('sort_img').src = img_num[parseInt(document.getElementById('count').innerHTML) % img_num.length];
-                document.getElementById('year_old').innerHTML = ''+ years +'Y'+ months +'M';
-                ">></button>
-                    </div>
-            """
-#{count_value}
-        current_bg='white'
-        current_font='black'
-        if sort_img[0]=='https://kycvtdlganlfymsyczpu.supabase.co/storage/v1/object/public/img/no_img.jpeg':
-            current_bg='black'
-            current_font='white'
+                    ">></button>
+                        </div>
+                """
+            if sort_dt[0]!='2020-11-01':
+              
+                current_bg='white'
+                current_font='black'
+        except:
+            html_str="<div>No image</div>"
+
         folium.Marker((x[0],x[1]),popup=html_str,icon=folium.DivIcon(
                                         icon_size=(150,36),
                                         icon_anchor=(0,0),
@@ -190,11 +194,17 @@ def cal_img_locat(loc_df ,img_df):
 def main_app_draw_map():
     r=supabase_conn(SUPABASE_PROJECT_URL, SUPABASE_API_KEY)
     r.login_by_email(SUPABASE_UR, SUPABASE_PD)
+    
+    #UAT
+    # df=read_excel_to_list('loc.xlsx')
+    # img_df=r.get_img_df()
+    #PAT
     df=r.get_loc_df()
     img_df=r.get_img_df()
+    
     match_data_df=cal_img_locat(df,img_df)
     num_rows = len(match_data_df)
-    m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
+    m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11).add_child(folium.LatLngPopup())####center on Liberty Bell, add marker #11
     #.add_child(folium.LatLngPopup())
     draw_all_mark(df,m,img_df)
     
@@ -202,7 +212,7 @@ def main_app_draw_map():
 
     #Draw(export=True).add_to(m)
     folium.Map()
-    st_folium(m,height=450,use_container_width=True, returned_objects=[])
+    st_folium(m,height=900,use_container_width=True, returned_objects=[])
     
     cols = st.columns(2)
     for index, row in match_data_df.iterrows():
@@ -260,7 +270,7 @@ if __name__ == "__main__":
     st.set_page_config(page_title='Map')
     loginSection = st.container()
     headerSection = st.container()
-
+    # main_app_draw_map()
     with headerSection:
         #if 'authenticated' not in st.session_state:
         client = login_form(allow_create =False)
