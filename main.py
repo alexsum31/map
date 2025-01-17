@@ -204,7 +204,7 @@ def main_app_draw_map():
     
     match_data_df=cal_img_locat(df,img_df)
     num_rows = len(match_data_df)
-    m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11).add_child(folium.LatLngPopup())####center on Liberty Bell, add marker #11
+    m = folium.Map(location=[22.32176,114.122024], tiles="Cartodb Positron",zoom_start=11)####center on Liberty Bell, add marker #11
     #.add_child(folium.LatLngPopup())
     draw_all_mark(df,m,img_df)
     
