@@ -240,7 +240,7 @@ def draw_uploader():
         date_time_obj = datetime.datetime.strptime(pic_date, date_format)
         resize_img.save(buffered, format="JPEG")
         f=buffered.getvalue()
-        st.image(resize_img,width=60)
+        st.image(resize_img,width=70)
         st.write(f'Take picture {pic_date}')
         with st.form(key='my_form',clear_on_submit=True):
             location_list=df['name'].unique().tolist()
